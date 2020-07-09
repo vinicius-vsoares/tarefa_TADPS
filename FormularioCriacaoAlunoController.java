@@ -5,124 +5,142 @@ import java.awt.event.ActionListener;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import javax.swing.JOptionPane;
-
 import dao.FormularioDAO;
 import modelo.Aluno;
 import modelo.Formulario;
-import view.TelaFormulario;
+import view.Formulario;
 import view.TelaLogin;
 import view.TelaMenu;
-import view.TelaSobre;
+import view.TelaInformacoesAPP;
 
 public class FormularioCriacaoAlunoController implements ActionListener {
-	private Formulario form;
-	private TelaFormulario telaForm;
-	private FormularioDAO formDAO;
-	private Aluno alu;
+    private Formulario formulario;
+    private TelaFormulario telaFormulario;
+    private FormularioDAO formularioDAO;
+    private Aluno aluno;
 
-	public FormularioCriacaoAlunoController(TelaFormulario telaForm, Aluno alu) {
-		super();
-		this.alu = alu;
-		this.telaForm = telaForm;
-		this.form = null;
-		this.telaForm.getSubmit().addActionListener(this);
-		this.telaForm.getClean().addActionListener(this);
-		this.telaForm.getMntmSair().addActionListener(this);
-		this.telaForm.getMntmPginaInicial().addActionListener(this);
-		this.telaForm.getMntmSobre().addActionListener(this);
+    public FormularioCriacaoAlunoController(TelaFormulario telaFormulario, Aluno aluno) {
+        super();
+        //atribuição de variáveis globais para ser utilizada no restante de código
+        this.aluno = aluno;
+        this.telaFormulario = telaFormulario;
+        this.formulario = null;
+        this.telaFormulario.getBtEnviar().addActionListener(this);
+        this.telaFormulario.getBtLimpar().addActionListener(this);
+        this.telaFormulario.getBtSair().addActionListener(this);
+        this.telaFormulario.getBtPaginaInicial().addActionListener(this);
+        this.telaFormulario.getBtSobre().addActionListener(this);
+        this.telaFormulario.getTextoNome().setText(aluno.getNome());
+        this.telaFormulario.getTextoSerie().setText(Integer.toString(aluno.getSerie()));
+    }
 
-		this.telaForm.getTextNome().setText(alu.getNome());
-		this.telaForm.getTfSerie().setText(Integer.toString(alu.getSerie()));
-	}
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        switch (e.getActionCommand()) {
+            case "Enviar":
+                opcaoEnviar();
+                break;
+            case "Limpar":
+                opcaoLimpar();
+                break;
+            case "Sair":
+                opcaoSair();
+                break;
+            case "Página inicial":
+                opcaoPaginaInicial();
+                break;
+            case "Sobre":
+                opcaoSobre();
+                break;
+        }
+    }
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		// TODO Auto-generated method stub
-		if (e.getActionCommand().equals("Enviar")) {
-			if (!this.telaForm.getTextArea().getText().isEmpty() && !this.telaForm.getObs().getText().isEmpty()
-					&& !this.telaForm.getTextTelefone().getText().isEmpty()
-					&& this.telaForm.getComboBoxAno().getSelectedIndex() != 0
-					&& this.telaForm.getComboBoxDia().getSelectedIndex() != 0
-					&& this.telaForm.getComboBoxMes().getSelectedIndex() != 0
-					&& !this.telaForm.getTextNovaArea().getText().isEmpty()) {
+    private void opcaoEnviar() {
+        // verifica se existe algum campo de texto em branco
+        if (!this.telaFormulario.getTextArea().getText().isEmpty() && !this.telaFormulario.getObservacao().getText().isEmpty() &&
+            !this.telaFormulario.getTextTelefone().getText().isEmpty() &&
+            this.telaFormulario.getComboBoxAno().getSelectedIndex() != 0 &&
+            this.telaFormulario.getComboBoxDia().getSelectedIndex() != 0 &&
+            this.telaFormulario.getComboBoxMes().getSelectedIndex() != 0 &&
+            !this.telaFormulario.getTextNovaArea().getText().isEmpty()) {
 
-				String dia = Integer.toString(this.telaForm.getComboBoxDia().getSelectedIndex());
-				String mes = Integer.toString(this.telaForm.getComboBoxMes().getSelectedIndex());
-				String ano = this.telaForm.getComboBoxAno().getSelectedItem().toString();
+            String dia = Integer.toString(this.telaFormulario.getComboBoxDia().getSelectedIndex());
+            String mes = Integer.toString(this.telaFormulario.getComboBoxMes().getSelectedIndex());
+            String ano = this.telaFormulario.getComboBoxAno().getSelectedItem().toString();
 
-				form = new Formulario();
-				String data = ano + "-" + mes + "-" + dia;
+            formulario = new Formulario();
+            String data = ano + "-" + mes + "-" + dia;
 
-				DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-				Date date = new Date();
-				System.out.println(data);
-				System.out.println(dateFormat.format(date));
-				this.form.setData_ini(data);
-				this.form.setData(dateFormat.format(date));
-				this.form.setArea_atual(this.telaForm.getTextArea().getText());
-				this.form.setObs(this.telaForm.getObs().getText());
-				this.form.setArea_nova(this.telaForm.getTextNovaArea().getText());
-				this.form.setTelefone(this.telaForm.getTextTelefone().getText());
-				this.form.setAluno(alu);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+            Date date = new Date();
+            this.formulario.setData_ini(data);
+            this.formulario.setData(dateFormat.format(date));
+            this.formulario.setAreaAtual(this.telaFormulario.getTextArea().getText());
+            this.formulario.setObservacao(this.telaFormulario.getTextObservacao().getText());
+            this.formulario.setNovaArea(this.telaFormulario.getTextNovaArea().getText());
+            this.formulario.setTelefone(this.telaFormulario.getTextTelefone().getText());
+            this.formulario.setAluno(aluno);
 
-				formDAO = new FormularioDAO(this.form);
-				if (formDAO.insertForm()) {
-					TelaMenu ma2 = new TelaMenu();
-					ma2.setVisible(true);
-					this.telaForm.dispose();
-					ma2.setLocationRelativeTo(null);
-					new MenuAlunoController(alu, ma2);
-					JOptionPane.showMessageDialog(null, "Formulário cadastrado com sucesso!", "Sucesso",
-							JOptionPane.INFORMATION_MESSAGE);
-				} else {
-					JOptionPane.showMessageDialog(null, "Erro ao inserir. Tente novamente!", "Erro",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			} else {
-				JOptionPane.showMessageDialog(null, "Existem campos não preenchidos!", "Erro",
-						JOptionPane.INFORMATION_MESSAGE);
-			}
+            formularioDAO = new FormularioDAO(this.formulario);
+            // verificação se o cadastro do formulário foi bem sucedido
+            if (formularioDAO.insertForm()) {
+                TelaMenu telaMenu = new TelaMenu();
+                telaMenu.setVisible(true);
+                this.telaFormulario.dispose();
+                telaMenu.setLocationRelativeTo(null);
+                new MenuAlunoController(aluno, telaMenu);
+                JOptionPane.showMessageDialog(null, "Formulário cadastrado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+            } else {
+                JOptionPane.showMessageDialog(null, "Erro ao inserir. Tente novamente!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Existem campos não preenchidos!", "Erro", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 
-		}
+    private void opcaoLimpar() {
+        //define todas as variáveis para seu valor default
+        this.telaFormulario.getComboBoxAno().setSelectedIndex(0);
+        this.telaFormulario.getComboBoxDia().setSelectedIndex(0);
+        this.telaFormulario.getComboBoxMes().setSelectedIndex(0);
+        this.telaFormulario.getTextoNome().setText("");
+        this.telaFormulario.getTextArea().setText("");
+        this.telaFormulario.getTextNovaArea().setText("");
+        this.telaFormulario.getTextTelefone().setText("");
+        this.telaFormulario.getObservacao().setText("");
+    }
 
-		if (e.getActionCommand().equals("Limpar")) {
-			this.telaForm.getComboBoxAno().setSelectedIndex(0);
-			this.telaForm.getComboBoxDia().setSelectedIndex(0);
-			this.telaForm.getComboBoxMes().setSelectedIndex(0);
-			this.telaForm.getTextNome().setText("");
-			this.telaForm.getTextArea().setText("");
-			this.telaForm.getTextNovaArea().setText("");
-			this.telaForm.getTextTelefone().setText("");
-			this.telaForm.getObs().setText("");
-		}
+    private void sair() {
+        this.aluno = null;
+        TelaLogin telaLogin = new TelaLogin();
+        telaLogin.setVisible(true);
+        telaLogin.setLocationRelativeTo(null);
+        new LoginController(telaLogin);
+        this.telaFormulario.dispose();
+    }
 
-		if (e.getActionCommand().equals("Sair")) {
-			alu = null;
-			TelaLogin tl = new TelaLogin();
-			tl.setVisible(true);
-			tl.setLocationRelativeTo(null);
-			new LoginController(tl);
-			this.telaForm.dispose();
+    private void opcaoSair() {
+        try {
+            sair();
+            JOptionPane.showMessageDialog(null, "Sua sessão foi encerrada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Erro, tente novamente!", "Erro", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
 
-			JOptionPane.showMessageDialog(null, "Sua sessão foi encerrada com sucesso!", "Sucesso",
-					JOptionPane.INFORMATION_MESSAGE);
-		}
-		if (e.getActionCommand().equals("Página inicial")) {
-			TelaMenu ma2 = new TelaMenu();
-			ma2.setVisible(true);
-			this.telaForm.dispose();
-			ma2.setLocationRelativeTo(null);
-			new MenuAlunoController(alu, ma2);
-		}
+    private void opcaoPaginaInicial() {
+        TelaMenu telaMenu = new TelaMenu();
+        telaMenu.setVisible(true);
+        this.telaFormulario.dispose();
+        telaMenu.setLocationRelativeTo(null);
+        new MenuAlunoController(aluno, telaMenu);
+    }
 
-		if (e.getActionCommand().equals("Sobre")) {
-			TelaSobre ts = new TelaSobre();
-			ts.setVisible(true);
-			ts.setLocationRelativeTo(null);
-		}
-
-	}
+    private void opcaoSobre() {
+        TelaInformacoesApp telaInformacoesApp = new TelaInformacoesAPP();
+        telaInformacoesApp.setVisible(true);
+        telaInformacoesApp.setLocationRelativeTo(null);
+    }
 
 }
