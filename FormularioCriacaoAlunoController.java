@@ -35,6 +35,10 @@ public class FormularioCriacaoAlunoController implements ActionListener {
         this.telaFormulario.getTextoSerie().setText(Integer.toString(aluno.getSerie()));
     }
 
+	/*
+		função genérica que é acionada a cada clique de um botão na tela. Para saber qual a opção selecionada é necessário verificar o comando
+		atribuído para cada função (getActionCommand)
+	 */
     @Override
     public void actionPerformed(ActionEvent e) {
         switch (e.getActionCommand()) {
